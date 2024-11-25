@@ -32,7 +32,7 @@ for x in range(image.shape[0]):
 
 features_shaped = features.reshape(-1, features.shape[-1])
 
-# Apply K-Means clustering with 3 clusters
+# Apply K-Means clustering
 kmeans = KMeans(n_clusters=5, random_state=0).fit(features_shaped)
 labels = kmeans.labels_
 
