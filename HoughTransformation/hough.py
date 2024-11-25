@@ -54,7 +54,7 @@ def hough_transform(image, min_radius, max_radius):
     return output
 
 if __name__ == "__main__":
-    image = cv2.imread("image.pgm", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("Images/image.pgm", cv2.IMREAD_UNCHANGED)
     
     if image is None:
         print("Error: Could not load image.pgm")
