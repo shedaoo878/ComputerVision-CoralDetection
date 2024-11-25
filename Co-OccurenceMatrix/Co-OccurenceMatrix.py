@@ -3,6 +3,8 @@ import numpy as np
 from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 from skimage import io
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
 
 PATCH_SIZE = 10
 
@@ -38,6 +40,7 @@ labels = kmeans.labels_
 labels = labels.reshape(image.shape)
 
 # Visualize the segmented image
-io.imshow(labels, cmap='rainbow')
-io.show()
+plt.imshow(labels, cmap='rainbow')
+plt.title("GLCM and KMEANS")
+plt.show()
         

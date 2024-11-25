@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from skimage import io
 
@@ -61,5 +62,6 @@ labels = kmeans.labels_
 labels = labels.reshape(img.shape)
 
 # Visualize the segmented image
-io.imshow(labels, cmap='rainbow')
-io.show()
+plt.imshow(labels, cmap='rainbow')
+plt.title("LAWS ENERGY FILTERS and KMEANS")
+plt.show()
