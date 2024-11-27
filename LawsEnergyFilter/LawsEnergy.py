@@ -3,11 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from skimage import io
+from scipy.ndimage import uniform_filter, convolve
+from sklearn.decomposition import PCA
 
 # Define Laws kernels
 L5 = np.array([[1, 4, 6, 4, 1]])
 E5 = np.array([[-1, -2, 0, 2, 1]])
 S5 = np.array([[-1, 0, 2, 0, -1]])
+R5 = np.array([[1, -4, 6, -4, 1]])
+W5 = np.array([[-1, 2, 0, -2, 1]])
 
 # Load the grayscale image
 img = cv2.imread("Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
@@ -15,47 +19,52 @@ io.imshow(img)
 io.show()
 
 # Apply Laws filters on the image
-L5L5 = cv2.filter2D(img, -1, np.outer(L5, L5))
-L5E5 = cv2.filter2D(img, -1, np.outer(L5, E5))
-L5S5 = cv2.filter2D(img, -1, np.outer(L5, S5))
-E5L5 = cv2.filter2D(img, -1, np.outer(E5, L5))
-E5E5 = cv2.filter2D(img, -1, np.outer(E5, E5))
-E5S5 = cv2.filter2D(img, -1, np.outer(E5, S5))
-S5L5 = cv2.filter2D(img, -1, np.outer(S5, L5))
-S5E5 = cv2.filter2D(img, -1, np.outer(S5, E5))
-S5S5 = cv2.filter2D(img, -1, np.outer(S5, S5))
+filteredimg = []
+for kernel1 in [L5, E5, S5, R5, W5]:
+    for kernel2 in [L5, E5, S5, R5, W5]:
+        filteredimg.append(cv2.filter2D(img, -1, np.outer(kernel1, kernel2)))
+        # filteredimg.append(convolve(img, np.outer(kernel1, kernel2), mode='nearest'))
 
 # Square the pixel values of each image after filter application to amplify results
-L5L5_squared = np.square(L5L5)
-L5E5_squared = np.square(L5E5)
-L5S5_squared = np.square(L5S5)
-E5L5_squared = np.square(E5L5)
-E5E5_squared = np.square(E5E5)
-E5S5_squared = np.square(E5S5)
-S5L5_squared = np.square(S5L5)
-S5E5_squared = np.square(S5E5)
-S5S5_squared = np.square(S5S5)
+for i in range(len(filteredimg)):
+    filteredimg[i] = np.square(filteredimg[i])
 
-# averaging vectors for small neighborhoods 
+# # averaging vectors for small neighborhoods 
 neighborhood_size = 16
-L5L5_avg = cv2.blur(L5L5_squared, (neighborhood_size, neighborhood_size))
-L5E5_avg = cv2.blur(L5E5_squared, (neighborhood_size, neighborhood_size))
-L5S5_avg = cv2.blur(L5S5_squared, (neighborhood_size, neighborhood_size))
-E5L5_avg = cv2.blur(E5L5_squared, (neighborhood_size, neighborhood_size))
-E5E5_avg = cv2.blur(E5E5_squared, (neighborhood_size, neighborhood_size))
-E5S5_avg = cv2.blur(E5S5_squared, (neighborhood_size, neighborhood_size))
-S5L5_avg = cv2.blur(S5L5_squared, (neighborhood_size, neighborhood_size))
-S5E5_avg = cv2.blur(S5E5_squared, (neighborhood_size, neighborhood_size))
-S5S5_avg = cv2.blur(S5S5_squared, (neighborhood_size, neighborhood_size))
+for i in range(len(filteredimg)):
+    filteredimg[i] = cv2.blur(filteredimg[i], (neighborhood_size, neighborhood_size))
+    # filteredimg[i] = uniform_filter(filteredimg[i], size=neighborhood_size, mode='nearest')
 
 # creating feature vectors
-features = np.stack([L5L5_avg.flatten(), L5E5_avg.flatten(), L5S5_avg.flatten(),
-                     E5L5_avg.flatten(), E5E5_avg.flatten(), E5S5_avg.flatten(),
-                     S5L5_avg.flatten(), S5E5_avg.flatten(), S5S5_avg.flatten()], axis=1)
+flattened_filteredimg = np.array([arr.flatten() for arr in filteredimg])
+features = np.stack(flattened_filteredimg, axis=1)
 
+#Implementing Principle Component Analysis
+pca = PCA()
+pca.fit(features)
+explained_variance_ratio = pca.explained_variance_ratio_
+cumulative_var_ratio = np.cumsum(explained_variance_ratio)
+
+#showing the Scree Plot to identify the optimal number of components
+plt.plot(range(1, len(cumulative_var_ratio) + 1), cumulative_var_ratio)
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('Scree Plot')
+plt.show()
+
+threshold = 0.95
+n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
+
+print("n_components: ", n_components)
+
+pca = PCA(n_components=n_components)
+pca_features = pca.fit_transform(features)
+
+print("features: ", features)
+print("pca_features: ", pca_features)
 
 # Apply K-Means 
-kmeans = KMeans(n_clusters=4, random_state=0).fit(features)
+kmeans = KMeans(n_clusters=4, random_state=0).fit(pca_features)
 labels = kmeans.labels_
 
 # Reshape labels to match the image shape

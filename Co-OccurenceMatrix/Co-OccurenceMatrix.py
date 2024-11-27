@@ -4,12 +4,14 @@ from skimage.feature import graycomatrix, graycoprops, local_binary_pattern
 from skimage import io
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
-
-PATCH_SIZE = 10
+PATCH_SIZE = 36
 
 # Load the image
 image = cv2.imread("Images/coral.pgm", cv2.IMREAD_GRAYSCALE)
+
+#decreasing the resolution of the image
 image = cv2.resize(image, (int(image.shape[1]/4), int(image.shape[0]/4)))
 
 io.imshow(image)
@@ -32,8 +34,30 @@ for x in range(image.shape[0]):
 
 features_shaped = features.reshape(-1, features.shape[-1])
 
+pca = PCA()
+pca.fit(features_shaped)
+explained_variance_ratio = pca.explained_variance_ratio_
+cumulative_var_ratio = np.cumsum(explained_variance_ratio)
+
+plt.plot(range(1, len(cumulative_var_ratio) + 1), cumulative_var_ratio)
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('Scree Plot')
+plt.show()
+
+threshold = 0.95
+n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
+
+print("n_components: ", n_components)
+
+pca = PCA(n_components=n_components)
+pca_features = pca.fit_transform(features_shaped)
+
+print("features: ", len(features_shaped))
+print("pca_features: ", len(pca_features))
+
 # Apply K-Means clustering
-kmeans = KMeans(n_clusters=5, random_state=0).fit(features_shaped)
+kmeans = KMeans(n_clusters=6, random_state=0).fit(pca_features)
 labels = kmeans.labels_
 
 # Reshape labels to match the image shape
