@@ -39,7 +39,7 @@ R5 = np.array([[1, -4, 6, -4, 1]])
 W5 = np.array([[-1, 2, 0, -2, 1]])
 
 # Load the grayscale image
-img = cv2.imread("Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
+img = cv2.imread("../Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
 io.imshow(img)
 io.show()
 

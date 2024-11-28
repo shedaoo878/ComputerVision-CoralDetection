@@ -34,7 +34,7 @@ def principle_component_analysis(features):
 PATCH_SIZE = 36
 
 # Load the image
-image = cv2.imread("Images/coral.pgm", cv2.IMREAD_GRAYSCALE)
+image = cv2.imread("../Images/coral.pgm", cv2.IMREAD_GRAYSCALE)
 
 #decreasing the resolution of the image
 image = cv2.resize(image, (int(image.shape[1]/4), int(image.shape[0]/4)))
