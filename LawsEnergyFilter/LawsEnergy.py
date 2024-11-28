@@ -18,7 +18,7 @@ def principle_component_analysis(features):
     plt.title('Scree Plot')
     plt.show()
 
-    threshold = 0.95
+    threshold = 0.99
     n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
 
     print("n_components: ", n_components)
@@ -40,8 +40,20 @@ W5 = np.array([[-1, 2, 0, -2, 1]])
 
 # Load the grayscale image
 img = cv2.imread("../Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
+
+#showing the image
 io.imshow(img)
 io.show()
+
+#using 64 bit float representation
+img = np.array(img, dtype=np.float64)
+
+# Find the minimum and maximum values and their locations
+min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img)
+print("Minimum pixel value:", min_val)
+print("Minimum pixel location:", min_loc)
+print("Maximum pixel location:", max_loc)
+print("Maximum pixel value:", max_val)
 
 # Apply Laws filters on the image
 filteredimg = []
@@ -50,10 +62,9 @@ for kernel1 in [L5, E5, S5, R5, W5]:
         filteredimg.append(cv2.filter2D(img, -1, np.outer(kernel1, kernel2)))
         # filteredimg.append(convolve(img, np.outer(kernel1, kernel2), mode='nearest'))
 
-
-# Square the pixel values of each image after filter application to amplify results
-for i in range(len(filteredimg)):
-    filteredimg[i] = np.square(filteredimg[i])
+# # Square the pixel values of each image after filter application to amplify results
+# for i in range(len(filteredimg)):
+#     filteredimg[i] = np.square(filteredimg[i])
 
 # averaging vectors for small neighborhoods 
 neighborhood_size = 16
@@ -65,10 +76,14 @@ for i in range(len(filteredimg)):
 flattened_filteredimg = np.array([arr.flatten() for arr in filteredimg])
 features = np.stack(flattened_filteredimg, axis=1)
 
+#finding the minimum and maximum pixel values after applying changes
+print("Max", max(features.flatten()))
+print("Min", min(features.flatten()))
+
 pca_features = principle_component_analysis(features)
 
 # Apply K-Means 
-kmeans = KMeans(n_clusters=4, random_state=0).fit(features)
+kmeans = KMeans(n_clusters=3, random_state=0).fit(features)
 labels = kmeans.labels_
 
 # Reshape labels to match the image shape
