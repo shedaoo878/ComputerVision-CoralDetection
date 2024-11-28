@@ -39,6 +39,7 @@ image = cv2.imread("../Images/coral.pgm", cv2.IMREAD_GRAYSCALE)
 #decreasing the resolution of the image
 image = cv2.resize(image, (int(image.shape[1]/4), int(image.shape[0]/4)))
 
+#showing the original image
 io.imshow(image)
 io.show()
 
