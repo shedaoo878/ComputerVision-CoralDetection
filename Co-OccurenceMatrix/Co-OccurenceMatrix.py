@@ -6,6 +6,31 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
+def principle_component_analysis(features):
+    pca = PCA()
+    pca.fit(features)
+    explained_variance_ratio = pca.explained_variance_ratio_
+    cumulative_var_ratio = np.cumsum(explained_variance_ratio)
+
+    plt.plot(range(1, len(cumulative_var_ratio) + 1), cumulative_var_ratio)
+    plt.xlabel('Number of Components')
+    plt.ylabel('Cumulative Explained Variance')
+    plt.title('Scree Plot')
+    plt.show()
+
+    threshold = 0.95
+    n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
+
+    print("n_components: ", n_components)
+
+    pca = PCA(n_components=n_components)
+    pca_features = pca.fit_transform(features)
+
+    print("features: ", len(features))
+    print("pca_features: ", len(pca_features))
+
+    return pca_features
+
 PATCH_SIZE = 36
 
 # Load the image
@@ -34,27 +59,7 @@ for x in range(image.shape[0]):
 
 features_shaped = features.reshape(-1, features.shape[-1])
 
-pca = PCA()
-pca.fit(features_shaped)
-explained_variance_ratio = pca.explained_variance_ratio_
-cumulative_var_ratio = np.cumsum(explained_variance_ratio)
-
-plt.plot(range(1, len(cumulative_var_ratio) + 1), cumulative_var_ratio)
-plt.xlabel('Number of Components')
-plt.ylabel('Cumulative Explained Variance')
-plt.title('Scree Plot')
-plt.show()
-
-threshold = 0.95
-n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
-
-print("n_components: ", n_components)
-
-pca = PCA(n_components=n_components)
-pca_features = pca.fit_transform(features_shaped)
-
-print("features: ", len(features_shaped))
-print("pca_features: ", len(pca_features))
+pca_features = principle_component_analysis(features_shaped)
 
 # Apply K-Means clustering
 kmeans = KMeans(n_clusters=6, random_state=0).fit(pca_features)
@@ -67,4 +72,4 @@ labels = labels.reshape(image.shape)
 plt.imshow(labels, cmap='rainbow')
 plt.title("GLCM and KMEANS")
 plt.show()
-        
+
