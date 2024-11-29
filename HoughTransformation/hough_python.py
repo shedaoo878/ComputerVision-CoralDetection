@@ -52,13 +52,13 @@ def hough_transform(image, min_radius, max_radius):
     return output
 
 if __name__ == "__main__":
-    image = cv2.imread("coraltest.pgm", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("Images/coraltest.pgm", cv2.IMREAD_UNCHANGED)
     
     if image is None:
         print("Error: Could not load image.pgm")
         exit(1)
         
-    min_radius = 10  
+    min_radius = 10 
     max_radius = 25
     
     try:
