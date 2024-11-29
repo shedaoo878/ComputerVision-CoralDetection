@@ -6,33 +6,31 @@ import cv2
 def hough_transform(image, min_radius, max_radius):
     if image is None:
         raise ValueError("Could not load image")
-
-    if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = image
+    
+    gray = image
 
 
-    _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, 70, 255, cv2.THRESH_BINARY_INV)
     
    
-    blurred = cv2.GaussianBlur(binary, (5, 5), 1.5)
-    
-    
-    kernel = np.ones((3,3), np.uint8)
-    blurred = cv2.morphologyEx(blurred, cv2.MORPH_CLOSE, kernel)
+    blurred = cv2.GaussianBlur(binary, (9, 9), 6)
     
 
-    cv2.imshow("Preprocessed", blurred)
+
+    cv2.imshow("Original Image", gray)
     cv2.waitKey(0)
-    cv2.destroyAllWindows()
+   
+
+    cv2.imshow("Binary and Gaussian Blurred", blurred)
+    cv2.waitKey(0)
+    
     
 
     circles = cv2.HoughCircles(
         blurred,
         cv2.HOUGH_GRADIENT,
         dp=1,
-        minDist=10,    
+        minDist=30,    
         param1=40,   #higher val detects stronger circles, lower val detects weaker circles
         param2=20,   #same as above
         minRadius=min_radius,
@@ -54,19 +52,19 @@ def hough_transform(image, min_radius, max_radius):
     return output
 
 if __name__ == "__main__":
-    image = cv2.imread("image.pgm", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("coraltest.pgm", cv2.IMREAD_UNCHANGED)
     
     if image is None:
         print("Error: Could not load image.pgm")
         exit(1)
         
-    min_radius = 120  
-    max_radius = 180
+    min_radius = 10  
+    max_radius = 25
     
     try:
         result = hough_transform(image, min_radius, max_radius)
         
-        cv2.imshow("Original", image)
+        
         cv2.imshow("Detected Circles", result)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
