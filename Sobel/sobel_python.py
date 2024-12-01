@@ -35,8 +35,9 @@ if __name__ == "__main__":
             else:
                 print("Enter Correct Name")
 
-    #decreasing the resolution of the image
+    #decreasing the resolution of the image. ONLY USED FOR CORAL IMAGES
     image_resized = cv2.resize(image, (int(image.shape[0]/6), int(image.shape[1]/6)))
+    # image_resized = image
 
     #show original image
     io.imshow(image_resized)
