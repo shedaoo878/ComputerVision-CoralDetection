@@ -19,11 +19,12 @@ def canny_edge_detection(image):
     
     #show image
     cv2.imshow("Edges", edges)
+    cv2.imwrite("CannyResults/cannyResult.jpg", edges);
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":  
-    image = cv2.imread("coraltest.pgm", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("../Images/coraltest.pgm", cv2.IMREAD_UNCHANGED)
     if image is None:
         print("Error: Could not load image.pgm")
         exit(1)

@@ -81,6 +81,7 @@ if __name__ == "__main__":
     # Load the grayscale image
     img = cv2.imread("../Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
 
+
     #showing the image
     io.imshow(img)
     io.show()
@@ -100,6 +101,8 @@ if __name__ == "__main__":
     features = laws_texture_energy(img)
     pca_features = principle_component_analysis(features)
     labels = kmeans(clusters=3, features=pca_features, image=img)
+
+
 
     # Visualize the segmented image
     plt.imshow(labels, cmap='rainbow')

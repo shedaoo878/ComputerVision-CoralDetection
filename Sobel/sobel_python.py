@@ -24,15 +24,14 @@ def sobel_edge_detection(image):
 
     # graident magnitude and direction
     magnitude = cv2.magnitude(grad_x, grad_y)
-    direction = cv2.phase(grad_x, grad_y, angleInDegrees=True)
-    
+
     # normalize magnitude
     magnitude = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
     
-    return magnitude, direction
+    return magnitude
 
 if __name__ == "__main__":
-    image = cv2.imread("coraltest.pgm", cv2.IMREAD_UNCHANGED)
+    image = cv2.imread("../Images/coraltest.pgm", cv2.IMREAD_UNCHANGED)
     if image is None:
         print("Error: Could not load image.pgm")
         exit(1)
@@ -43,5 +42,6 @@ if __name__ == "__main__":
 
     cv2.imshow("Magnitude", magnitude)
     cv2.imshow("Direction", direction)
+    cv2.imwrite("SobelResults/sobelResult.jpg", magnitude);
     cv2.waitKey(0)
     cv2.destroyAllWindows()
