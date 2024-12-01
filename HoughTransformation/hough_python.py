@@ -2,29 +2,13 @@
 
 import numpy as np
 import cv2
+from skimage import io
 
 def hough_transform(image, min_radius, max_radius):
-    if image is None:
-        raise ValueError("Could not load image")
-    
-    gray = image
 
+    _, binary = cv2.threshold(image, 70, 255, cv2.THRESH_BINARY_INV)
 
-    _, binary = cv2.threshold(gray, 70, 255, cv2.THRESH_BINARY_INV)
-    
-   
     blurred = cv2.GaussianBlur(binary, (9, 9), 6)
-    
-
-
-    cv2.imshow("Original Image", gray)
-    cv2.waitKey(0)
-   
-
-    cv2.imshow("Binary and Gaussian Blurred", blurred)
-    cv2.waitKey(0)
-    
-    
 
     circles = cv2.HoughCircles(
         blurred,
@@ -38,11 +22,10 @@ def hough_transform(image, min_radius, max_radius):
     )
     
     output = image.copy()
-    
+        
     if circles is not None:
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
-        
             cv2.circle(output, (i[0], i[1]), i[2], (255, 255, 255), 3)
             cv2.circle(output, (i[0], i[1]), 2, (128, 128, 128), 4)
         print(f"Found {len(circles[0])} circles")
@@ -52,23 +35,47 @@ def hough_transform(image, min_radius, max_radius):
     return output
 
 if __name__ == "__main__":
-    image = cv2.imread("../Images/coraltest.pgm", cv2.IMREAD_UNCHANGED)
     
-    if image is None:
-        print("Error: Could not load image.pgm")
-        exit(1)
+    # Load the image    
+    while True:
+        try:
+            file_name = input("Give the file name of an image in the Images folder: ")
+            image = cv2.imread("../Images/"+file_name, cv2.IMREAD_GRAYSCALE)
+        except cv2.error as e:
+            print("Error reading image:", e)
+        else:
+            if (image is not None):
+                print("Image read successfully!")
+                break
+            else:
+                print("Enter Correct Name")
+    
+    #decreasing the resolution of the image
+    image_resized = cv2.resize(image, (int(image.shape[0]/6), int(image.shape[1]/6)))
+
+    #showing original image
+    io.imshow(image_resized)
+    io.show()
         
+    #setting minimum and maximum radius
     min_radius = 10 
     max_radius = 25
     
-    try:
-        result = hough_transform(image, min_radius, max_radius)
-        
-        
-        cv2.imshow("Detected Circles", result)
-        cv2.imwrite('HoughResults/houghResult.jpg', result)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+    result = hough_transform(image_resized, min_radius, max_radius)
+    
+    result = cv2.resize(result, (int(image.shape[0]), int(image.shape[1])))
 
-    except Exception as e:
-        print(f"Error processing image: {str(e)}")
+    # write image to a jpg file
+    while True:
+        try:
+            file_result_name = input("A .jpg file will be added to HoughResults. Give a name for the file: ")
+            cv2.imwrite("HoughResults/"+file_result_name, result)
+        except cv2.error as e:
+            print("Error writing image:", e)
+        else:
+            print("Image written successfully!")
+            break
+
+    #show image
+    io.imshow(result)
+    io.show()

@@ -5,6 +5,8 @@ from sklearn.cluster import KMeans
 from skimage import io
 # from scipy.ndimage import uniform_filter, convolve; USE CV2 INSTEAD
 from sklearn.decomposition import PCA
+from matplotlib.colors import Normalize
+
 
 def laws_texture_energy(img):
     # Define Laws kernels
@@ -43,32 +45,6 @@ def laws_texture_energy(img):
     
     return features
 
-
-def principle_component_analysis(features):
-    pca = PCA()
-    pca.fit(features)
-    explained_variance_ratio = pca.explained_variance_ratio_
-    cumulative_var_ratio = np.cumsum(explained_variance_ratio)
-
-    plt.plot(range(1, len(cumulative_var_ratio) + 1), cumulative_var_ratio)
-    plt.xlabel('Number of Components')
-    plt.ylabel('Cumulative Explained Variance')
-    plt.title('Scree Plot')
-    plt.show()
-
-    threshold = 0.99
-    n_components = np.argmax(cumulative_var_ratio >= threshold) + 1
-
-    print("n_components: ", n_components)
-
-    pca = PCA(n_components=n_components)
-    pca_features = pca.fit_transform(features)
-
-    print("features: ", len(features))
-    print("pca_features: ", len(pca_features))
-
-    return pca_features
-
 def kmeans(clusters, features, image):
     # Apply K-Means clustering
     kmeans = KMeans(n_clusters=clusters, random_state=0).fit(features)
@@ -78,9 +54,19 @@ def kmeans(clusters, features, image):
     return labels.reshape(image.shape)
 
 if __name__ == "__main__":  
-    # Load the grayscale image
-    img = cv2.imread("../Images/coral.pgm",  cv2.IMREAD_GRAYSCALE)
-
+    # Load the image
+    while True:
+        try:
+            file_name = input("Give the file name of an image in the Images folder: ")
+            img = cv2.imread("../Images/"+file_name, cv2.IMREAD_GRAYSCALE)
+        except cv2.error as e:
+            print("Error reading image:", e)
+        else:
+            if (img is not None):
+                print("Image read successfully!")
+                break
+            else:
+                print("Enter Correct Name")
 
     #showing the image
     io.imshow(img)
@@ -97,14 +83,34 @@ if __name__ == "__main__":
     # print("Maximum pixel location:", max_loc)
     # print("Maximum pixel value:", max_val)
 
-    #segmenting the image
+    # segmenting the image
     features = laws_texture_energy(img)
-    pca_features = principle_component_analysis(features)
-    labels = kmeans(clusters=3, features=pca_features, image=img)
+    while True:
+        try:
+            num_clusters = int(input("Input number of clusters for Kmeans clustering: "))
+        except ValueError:
+            print("Provide an Integer Value")
+        else:
+            break
+    labels = kmeans(clusters=num_clusters, features=features, image=img)
 
+    # mapping labels to colors
+    cmap = plt.get_cmap('viridis', len(np.unique(labels)))
+    colored_labels = cmap(labels)
+    # convert to RGB
+    colored_labels = (colored_labels[:, :, :3] * 255).astype(np.uint8)
 
+    # write image to a jpg file
+    while True:
+        try:
+            file_result_name = input("A .jpg file will be added to LTEMResults. Give a name for the file: ")
+            cv2.imwrite("LTEMResults/"+file_result_name, colored_labels)
+        except cv2.error as e:
+            print("Error writing image:", e)
+        else:
+            print("Image written successfully!")
+            break
 
-    # Visualize the segmented image
-    plt.imshow(labels, cmap='rainbow')
-    plt.title("LAWS ENERGY FILTERS and KMEANS")
-    plt.show()
+    # Visualize the LAWS ENERGY FILTERS and KMEANS image
+    io.imshow(colored_labels)
+    io.show()
