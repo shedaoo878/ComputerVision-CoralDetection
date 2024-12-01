@@ -1,5 +1,3 @@
-#sobel edge detection
-
 import cv2
 import numpy as np
 from skimage import io
@@ -14,7 +12,7 @@ def sobel_edge_detection(image):
     grad_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
     grad_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
 
-    # graident magnitude and direction
+    # graident magnitude
     magnitude = cv2.magnitude(grad_x, grad_y)
 
     # normalize magnitude
